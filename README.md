@@ -1,1 +1,1 @@
-IntelliLearn AI
+intelilearn AI
