@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryProvider } from "@/components/providers/query-provider";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -15,11 +16,9 @@ const outFitFont = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "IntelliLearn AI",
+  title: "intelilearn AI",
   description: "AI Learning Platform to Connect with Other Learners",
 };
-
-const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -34,9 +33,9 @@ export default function RootLayout({
       >
         <body className={`${outFitFont.className} antialiased`}>
           <Header />
-          <QueryClientProvider client={queryClient} >
+          <QueryProvider >
             {children}
-          </QueryClientProvider>
+          </QueryProvider>
           <Footer />
         </body>
       </html>
