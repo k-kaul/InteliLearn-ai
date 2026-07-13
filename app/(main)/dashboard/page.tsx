@@ -1,9 +1,12 @@
 "use client"
 
+import { useUser } from "@clerk/nextjs"
 import { useQuery } from "@tanstack/react-query"
 
 export default function DashboardPage(){
-    const {data, isLoading, error} = useQuery({
+    const { user } = useUser();
+    
+    const {data, isLoading, error}= useQuery({
         queryKey: ["communities"],
         queryFn: async() => {
             return new Promise((resolve) => {
@@ -18,12 +21,10 @@ export default function DashboardPage(){
     
     return (
         <div className="page-wrapper">
-            <h1>Dashboard Page</h1>
-            {
-                data.map((community : {id:string; name:string; }) => (
-                    <div key={community.id}> {community.name}</div>
-                ))
-            }
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Dashboard Page</h1>
+                <p className="text-muted-foreground">Welcome Back, {user?.firstName || "User"}</p>
+            </div>
         </div>
     )
 } 
