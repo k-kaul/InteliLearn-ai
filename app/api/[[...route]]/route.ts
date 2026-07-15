@@ -1,28 +1,39 @@
-import { db } from "@/db";
-import { communities } from "@/db/schema";
 import { auth } from "@clerk/nextjs/server";
 import { Hono,  } from "hono";
 import { handle } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
+import  {communitiesApp}  from "@/app/routes/community-routes";
 
-type Variables = {
+export type Variables = {
     userId: string;
 }
 
 const app = new Hono<{Variables: Variables}>().basePath("/api"); //request context "Variables" containig userId 
 
 app.onError((err, c) => {
-    console.error(err);
-    return c.json({
-        error: err
-    },500)
+    console.error("API Error:", err);
+    
+    if(err instanceof HTTPException){
+        return err.getResponse();
+    }
+
+    if(err instanceof Error){
+        if(err.message.includes("violates") || err.message.includes('constraint')){
+            return c.json({ error: "invalid data provided" }, 400)
+        };
+    }
+
+    if(err.message.includes("not found") || err.message.includes('Not found')){
+        return c.json({error: err.message}, 404)
+    }
+
+    return c.json({ error: "Internal Server Error" }, 500)
 })
 
 app.use("/*", async (c, next) => {
     const publicRoutes = ['/api/communities/all'];
     
     if(publicRoutes.includes(c.req.path)){
-        console.log(c.req.path)
         return await next();
     }
 
@@ -39,11 +50,9 @@ app.use("/*", async (c, next) => {
     return await next();
 })
 
-app.get("/communities/all", async(c) => {
-    const allCommunites = await db.select().from(communities);
+const routes = app.route("/communities", communitiesApp);
 
-    return c.json(allCommunites)
-})
+export type AppType = typeof routes;
 
 export const GET = handle(app);
 export const POST = handle(app);
