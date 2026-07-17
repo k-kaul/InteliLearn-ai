@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { communities, communityMembers, learningGoals, users } from "@/db/schema";
+import { communities, communityMembers, learningGoals } from "@/db/schema";
 import { getOrCreateUserByClerkId } from "@/lib/user-utils";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
