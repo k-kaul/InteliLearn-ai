@@ -19,17 +19,28 @@ const communitiesApp = new Hono<{Variables: Variables}>()
         const clerkId = c.get("userId") as string;
         const {communityId} = c.req.param();    
         
-        const [community] = await db.select().from(communities).where(eq(communities.id,communityId));
-        
-        if(!community) throw new HTTPException(404, { message: "Community not found"});
+        const user = await getOrCreateUserByClerkId(clerkId);
+
+        if(!user) throw new HTTPException(404, { message: "User not found" });
+
+        const [existing] = await db.select()
+            .from(communityMembers)
+            .where(
+                and(
+                    eq(communityMembers.communityId, communityId), 
+                    eq(communityMembers.userId, user.id)
+                )
+            );
+
+        if(existing) throw new HTTPException(400, {message: "User already community member"});
 
         await db.insert(communityMembers).values({
-            userId:clerkId,
+            userId:user.id,
             communityId
-        });
+        })
 
         return c.json({
-            message: "Joined Community Successfully"
+            message: "Joined Community Successfully",
         })
     })
     .get("/", async (c) => {
@@ -50,7 +61,7 @@ const communitiesApp = new Hono<{Variables: Variables}>()
                             .from(communityMembers)
                             .innerJoin(communities,eq(communityMembers.communityId,communities.id))
                             .where(eq(communityMembers.userId,user.id));
-                console.log(userCommunities)
+                // console.log(userCommunities)
         
         return c.json(userCommunities);
     })
