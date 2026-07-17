@@ -1,4 +1,5 @@
 "use client"
+import AddLearningGoal from "@/components/communities/add-learning-goals";
 import AIMatching from "@/components/communities/ai-matching";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,17 +23,10 @@ export default function CommunitiesPage(){
         }
     },[communities, selectedCommunity]);
 
-    console.log(communityGoals)
+    // console.log(communityGoals)
 
     return (
         <div className="page-wrapper">
-            <div className="flex items-start justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Communities Page</h1>
-                    <p className="text-muted-foreground">Manage you learning goals and find learning partners.</p>
-                </div>
-                <Button variant={"outline"}>+ Join More Communities</Button>
-            </div>
             <div className="grid gap-6 lg:grid-cols-3">
                 <Card className="lg:col-span-1">
                     <CardHeader>
@@ -95,6 +89,7 @@ export default function CommunitiesPage(){
                                         </Card>
                                         </div>
                                     ))}
+                                    <AddLearningGoal />
                                 </div>
                             ) : (
                                 <AIMatching totalGoals={communityGoals?.length || 0}/>
