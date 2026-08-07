@@ -578,7 +578,7 @@
   }
 
   .hero-button-primary {
-    @apply relative overflow-hidden bg-gradient-to-r from-primary via-primary/95 to-primary hover:from-primary/95 hover:via-primary hover:to-primary/95 text-gray-900 font-bold shadow-xl hover:shadow-2xl transition-all duration-150 border-0;
+    @apply relative overflow-hidden bg-linear-to-r from-primary via-primary/95 to-primary hover:from-primary/95 hover:via-primary hover:to-primary/95 text-gray-900 font-bold shadow-xl hover:shadow-2xl transition-all duration-150 border-0;
   }
 
   .hero-button-content {
@@ -598,10 +598,10 @@
   }
 
   .hero-gradient-overlay-hover {
-    @apply absolute inset-0 bg-gradient-to-r from-white/30 via-white/20 to-transparent;
+    @apply absolute inset-0 bg-linear-to-r from-white/30 via-white/20 to-transparent;
   }
 
   .hero-gradient-overlay-animated {
-    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
+    @apply absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent;
   }
 }
