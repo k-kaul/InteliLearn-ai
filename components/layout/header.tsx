@@ -20,12 +20,12 @@ export default async function Header(){
                             <Link href={"/dashboard"}>
                                 <Button variant={"ghost"} size={"sm"}>Dashboard</Button>
                             </Link>
-                            <Link href={"/Chat"}>
+                            <Link href={"/chat"}>
                                 <Button variant={"ghost"} size={"sm"}>
                                     <MessageCircleIcon className="size-4 text-primary"/> Chat
                                 </Button>
                             </Link>
-                            <Link href={"/Communities"}>
+                            <Link href={"/communities"}>
                                 <Button variant={"ghost"} size={"sm"}>
                                     <UsersIcon className="size-4 text-primary"/>Communities
                                 </Button>
