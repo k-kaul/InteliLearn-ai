@@ -5,8 +5,8 @@ import { ClerkProvider} from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "@/components/ui/toast";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -37,6 +37,7 @@ export default function RootLayout({
             {children}
           </QueryProvider>
           <Footer />
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>
