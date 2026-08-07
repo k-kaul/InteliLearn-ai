@@ -1,11 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/toast";
 import { useAllCommunities, useCommunities, useJoinCommunity } from "@/hooks/useCommunities";
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function AllCommunitiesPage(){
     // const [isJoined, setisJoined] = useState(false);
@@ -15,6 +15,10 @@ export default function AllCommunitiesPage(){
     
     async function handleJoinCommunity(communityId:string){
         await joinCommunityMutation.mutateAsync(communityId);
+        toast.add({
+            type: "success",
+            description: "Joined community Successfully"
+        });
     }
 
     function isJoined(communityId:string){
