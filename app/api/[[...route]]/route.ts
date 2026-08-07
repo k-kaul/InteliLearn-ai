@@ -4,6 +4,7 @@ import { handle } from "hono/vercel";
 import { HTTPException } from "hono/http-exception";
 import  {communitiesApp}  from "@/app/routes/community-routes";
 import { learningGoalsApp } from "@/app/routes/learning-goals-routes";
+import { matchesApp } from "@/app/routes/matches-routes";
 
 export type Variables = {
     userId: string;
@@ -54,6 +55,7 @@ app.use("/*", async (c, next) => {
 const routes = app
     .route("/communities", communitiesApp)
     .route("/communities", learningGoalsApp)
+    .route("/matches", matchesApp)
 
 export type AppType = typeof routes;
 
