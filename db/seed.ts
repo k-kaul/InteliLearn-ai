@@ -50,7 +50,7 @@ const freeUsers = [
 // PRO USERS (multiple communities, multiple goals - unlimited access)
 const proUsers = [
   {
-    clerkId: "pro_001_temp",
+    clerkId: "user_3GMcp5bXzHnFbSezLTKGkKsM4Vk",
     email: "itskulkarniankita@gmail.com",
     name: "Ankita Kulkarni",
     subscriptionTier: "pro",

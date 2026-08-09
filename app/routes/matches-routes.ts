@@ -174,5 +174,43 @@ const matchesApp = new Hono<{Variables:Variables}>()
 
       return c.json(match);
   })
+  .get("/:matchId/conversation", async (c) => {
+    const user = c.get("user")
+    const matchId = c.req.param("matchId");
+    const [match] = await db.select().from(matches)
+      .where(eq(matches.id, matchId));
+    
+    if(!match) throw new HTTPException(404, { message: "Match not found"});
+
+    //get other user's id
+    const otherUserId = match.user1Id === user.id ? match.user2Id : match.user1Id;
+
+    const [otherUser] = await db.select().from(users).where(eq(users.id,otherUserId))
+
+    if(!otherUser) throw new HTTPException(404, {message: "other user not found"});
+
+    //check if conversation exists
+    let [conversation] = await db.select()
+      .from(conversations)
+      .where(eq(conversations.matchId, matchId));
+    
+    if(!conversation) {
+      [conversation] = await db.insert(conversations).values({
+        matchId
+      })
+      .returning();
+    }
+
+    return c.json({
+      ...conversation,
+      status: match.status,
+      currentUserId: user.id,
+      otherUser: {
+        id: otherUser.id || otherUserId,  
+        name: otherUser.name || "Unknown user",
+        imageUrl: otherUser.imageUrl ?? undefined
+      },
+    });
+  });
 
 export {matchesApp}

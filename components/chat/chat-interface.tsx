@@ -4,25 +4,56 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card
 import { UserAvatar } from "../ui/user-avatar";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/api-client";
+import { useUser } from "@clerk/nextjs";
 
-export function ChatInterface({conversationId}: {
-    conversationId:string;
+export function ChatInterface({matchId}: {
+    matchId:string;
 }){
-    const messages = [
-        {
-            id:1,
-            content: "How are you",
-            createdAt: new Date(),
-            sender: "John Doe"
+    const { user:clerkUser } = useUser();
+    //fetch the conversation for the match
+    const {data: conversation} = useQuery({
+        queryKey: ["conversation", matchId],
+        queryFn: async () => {
+            const res = await client.api.matches[':matchId'].conversation.$get({
+                param: {matchId}
+            })
 
-        }, 
-        {
-            id:2,
-            content: "I am good",
-            createdAt: new Date(),
-            sender: "Jane Doe"
+            if(!res.ok) throw new Error("Error fetching conversations");
+
+            return res.json();
         }
-    ]
+    })
+
+    //fetch messgaes for the conversation
+    const {data:messages} = useQuery({
+        queryKey: ["messages", conversation?.id ],
+        queryFn: async () => {
+            const res = await client.api.conversations[":conversationId"].messages.$get({
+                param: {conversationId: conversation?.id ?? ""}
+            })
+
+            if(!res.ok) throw new Error("failed to fetch messages");
+
+            return res.json();
+        }, 
+        refetchInterval: 5000,
+    });
+
+    if(!conversation) return <div>Loading...</div>;
+
+    const currentUser = {
+        name: (clerkUser?.firstName + " " + clerkUser?.lastName).trim() ?? "You",
+        imageUrl: clerkUser?.imageUrl ?? undefined
+    }
+    
+    const otherUser = {
+        id: conversation.otherUser.id,
+        name: conversation.otherUser.name,
+        imageUrl: conversation.otherUser.imageUrl,
+    }
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="col-span-2">
@@ -30,34 +61,34 @@ export function ChatInterface({conversationId}: {
                     <CardHeader className="border-b">
                         <div className="flex items-center gap-3">
                             <UserAvatar 
-                                name="John Doe"
-                                imageUrl="https://github.com/shadcn.png"
+                                name={currentUser.name}
+                                imageUrl={currentUser.imageUrl}
                             />
-                            <CardTitle>John Doe</CardTitle>
+                            <CardTitle>{currentUser.name}</CardTitle>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 p-4 overflow-y-auto space-y-4">
-                            { messages.map((message) => {
-                                const isCurrentUser = message.sender === "John Doe";
-                                const user = isCurrentUser ? "John Doe" : "Jane Doe";
+                            { messages?.map((message) => {
+                                const isCurrentUser = message.senderId === conversation.currentUserId;
+                                const user = isCurrentUser ? currentUser ?? "" : conversation.otherUser ?? "";
 
                             return (
                                     <div key={message.id} className="space-y-4">
                                         <div className={cn(
                                             "flex items-center gap-2", isCurrentUser ? "justify-end": "justify-start"
                                             )}>
-                                            { !isCurrentUser && <UserAvatar name="Jane Doe" imageUrl="https://github.com/shadcn.png"/> }
+                                            { !isCurrentUser && <UserAvatar name={user.name} imageUrl={user.imageUrl}/> }
                                             <div className={cn(
                                                 "max-w-[70%] rounded-lg p-3",
                                                 isCurrentUser ? "bg-primary/10 text-primary-foreground"
                                                 : "bg-muted text-muted-foreground"
                                             )}>
                                                 <p className="text-sm text-foreground">{message.content} </p>
-                                                <p className="text-xs text-foreground opacity-50 mt-1">{message.createdAt.toLocaleTimeString()}</p>
+                                                <p className="text-xs text-foreground opacity-50 mt-1">{message.createdAt}</p>
                                             </div>
                                             <div>
                                                 {isCurrentUser && (
-                                                    <UserAvatar name="John Doe" imageUrl="https://github.com/shadcn.png"/>
+                                                    <UserAvatar name={currentUser.name} imageUrl={currentUser.imageUrl}/>
                                                 )}
                                             </div>
                                         </div>
