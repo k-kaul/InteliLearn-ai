@@ -6,7 +6,6 @@ import  {communitiesApp}  from "@/app/routes/community-routes";
 import { learningGoalsApp } from "@/app/routes/learning-goals-routes";
 import { matchesApp } from "@/app/routes/matches-routes";
 import { conversationsApp } from "@/app/routes/conversation-routes";
-import { usersApp } from "@/app/routes/users-route";
 
 export type Variables = {
     userId: string;
