@@ -17,7 +17,7 @@ export default async function ChatPage({
                     <ArrowLeftIcon />Back to Conversations
                 </Button>
             </Link>
-            <ChatInterface conversationId={matchId}/>
+            <ChatInterface matchId={matchId}/>
         </div>
     )
 }
