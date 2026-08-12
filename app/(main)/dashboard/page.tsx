@@ -3,6 +3,8 @@
 import StatsCard from "@/components/dashboard/stats-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { useMatches } from "@/hooks/use-ai-partner";
 import { client } from "@/lib/api-client";
 import { useUser } from "@clerk/nextjs"
 import { useQuery } from "@tanstack/react-query"
@@ -22,7 +24,29 @@ export default function DashboardPage(){
         }
     })
 
-    const pendingMatches = 6
+    const {data: allmatches} = useQuery({
+        queryKey: ["allMatches"],
+        queryFn: async () => {
+            const res = await client.api.matches.allmatches.$get();
+            if(!res.ok) throw new Error("Failed to fetch pending matches");
+            return res.json();
+        }
+    });
+
+    const pendingMatches = allmatches?.filter((match) => match.status === "pending");
+    const activeMatches = allmatches?.filter((match) => match.status === "accepted");
+    
+    const {data: learningGoals} = useQuery({
+        queryKey: ['learingGoals'],
+        queryFn: async () => {
+            const res = await client.api.communities.goals.$get();
+            if(!res.ok) throw new Error("Failed to fetch learning goals");
+            
+            return res.json();
+        }
+    });
+
+    const {data: currentMatches} = useMatches();
     
     if(isLoadingUserCommunities) return <div>Loading...</div>
     if(errorUserCommunities) return <div>Error: {errorUserCommunities.message}</div>
@@ -38,8 +62,8 @@ export default function DashboardPage(){
             <Card className="border-primary">
                 <CardHeader>
                     <CardTitle>
-                        🤝 You have {pendingMatches} new {" "} 
-                        { pendingMatches === 1 ? "match!" : "matches!" }
+                        🤝 You have {pendingMatches?.length} new {" "} 
+                        { pendingMatches?.length === 1 ? "match!" : "matches!" }
                         </CardTitle>
                         <CardDescription>Review and accept your matches to start chatting.</CardDescription>
                 </CardHeader>
@@ -57,16 +81,16 @@ export default function DashboardPage(){
                     value={userCommunities?.length || 0}
                 />
                 <StatsCard 
-                    title="Learning Goals" 
-                    value={6}
+                    title="Learning Goals"
+                    value={learningGoals?.length || 0}
                 />
                 <StatsCard 
                     title="Active Matches" 
-                    value={6}
+                    value={activeMatches?.length || 0}
                 />
                 <StatsCard 
                     title="Pending Matches" 
-                    value={6}
+                    value={pendingMatches?.length || 0}
                 />
             </div>         
             
@@ -82,7 +106,34 @@ export default function DashboardPage(){
                                 <Button variant={"outline"} size={"sm"}>View All</Button>
                             </Link>
                         </div>
-                        <CardDescription>Chats:</CardDescription>
+                        {/* recent chats */}
+                        <CardContent>
+                            <div className="flex flex-col gap-3">
+                            {
+                                currentMatches?.map((match) => (
+                                    <Link key={match.id} href={`/chat/${match.id}`}>
+                                        <Card >
+                                            <CardHeader>
+                                                <div className="flex items-center gap-4">
+                                                    <UserAvatar name={match.partner.name} imageUrl={match.partner.imageUrl || ""}/>
+                                                    <div className="flex-1 min-w-8 gap-2">
+                                                        <CardTitle className={"font-medium"}>
+                                                            {match.partner.name}
+                                                        </CardTitle>
+                                                        <CardDescription className="text-xs text-muted-foreground mt-1">
+                                                            <span>
+                                                                {match.userGoals.map((g) => g.title).join(", ")}
+                                                            </span>
+                                                        </CardDescription>
+                                                    </div>
+                                                </div>
+                                            </CardHeader>
+                                        </Card>
+                                    </Link>
+                                ))
+                            }
+                            </div>
+                        </CardContent>
                     </CardHeader>                    
                 </Card>
 
