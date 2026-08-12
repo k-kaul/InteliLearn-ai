@@ -2,17 +2,20 @@ import { useAiPartners } from "@/hooks/use-ai-partner";
 import { Button } from "../ui/button";
 import { toast } from "../ui/toast";
 import { LockIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AIMatching({ totalGoals, selectedCommunityId, showLock }: { totalGoals:number; selectedCommunityId:string; showLock:boolean}){
     const aiPartnerMutation = useAiPartners();
-
+    const router = useRouter();
     async function handleFindAiPartners(){
         try {
             await aiPartnerMutation.mutateAsync(selectedCommunityId);
             toast.add({
                 title: "AI partners found successfully",
                 type: "success"
-            })
+            });
+            router.push("/chat")
+
         } catch (error) {
             console.error("Error finding AI partners", error);
             toast.add({
