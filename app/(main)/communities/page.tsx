@@ -98,13 +98,13 @@ export default function CommunitiesPage(){
                                         </Card>
                                         </div>
                                     ))}
-                                    <AddLearningGoal selectedCommunityId={selectedCommunity!} showLock/>
+                                    <AddLearningGoal selectedCommunityId={selectedCommunity!} showLock={showLock}/>
                                 </div>
                             ) : (
                                 <AIMatching 
                                     totalGoals={communityGoals?.length || 0}
                                     selectedCommunityId={selectedCommunity!}
-                                    showLock
+                                    showLock={showLock}
                                 />
                             )
                         }
