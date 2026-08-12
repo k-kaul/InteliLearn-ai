@@ -1,18 +1,23 @@
 import { Hono } from "hono";
-import { Variables } from "./conversation-routes";
 import { authMiddleware } from "./middleware/auth-middleware";
-import { getOrCreateUserByClerkId } from "@/lib/user-utils";
+import { auth } from "@clerk/nextjs/server";
 
-type AuthVariables = {
+type Variables = {
     userId: string;
-    user:NonNullable<Awaited<ReturnType<typeof getOrCreateUserByClerkId>>>
 };
 
-const usersApp = new Hono<{Variables:AuthVariables}>()
+const userApp = new Hono<{Variables:Variables}>()
     .use("/*", authMiddleware)
-    .get("/me", async (c) => {
+    .get("/", async (c) => {
         const user = c.get("user");
-        return c.json(user);
+        const { has } = await auth();
+
+        const isPro = has({plan: "pro"});
+        
+        return c.json({
+            ...user,
+            isPro
+        });
     });
 
-export {usersApp}
+export {userApp}
