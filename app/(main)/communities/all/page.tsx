@@ -3,8 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
+import { communities } from "@/db/schema";
+import { useCurrentUser } from "@/hooks/use-users";
 import { useAllCommunities, useCommunities, useJoinCommunity } from "@/hooks/useCommunities";
-import { ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function AllCommunitiesPage(){
@@ -12,6 +14,13 @@ export default function AllCommunitiesPage(){
     const { data:allCommunities, error, isLoading } = useAllCommunities();
     const { data:userCommunities } = useCommunities();
     const joinCommunityMutation = useJoinCommunity();
+    
+    const {data: user} = useCurrentUser();
+    const isPro = user?.isPro;
+
+    const numberOfCommunities = userCommunities?.length || 0;
+    
+    const showLock = numberOfCommunities >=3 && !isPro;
     
     async function handleJoinCommunity(communityId:string){
         await joinCommunityMutation.mutateAsync(communityId);
@@ -48,12 +57,16 @@ export default function AllCommunitiesPage(){
                                     <CardDescription className="px-0 mt-2">
                                         <Button 
                                             className="w-full" 
-                                            disabled={isJoined(community.id)}
-                                            onClick={() => handleJoinCommunity(community.id)}
-                                        >{
-                                            isJoined(community.id) ? <><CheckIcon />Joined</> : "Join Community"
-                                        }
-                                            </Button>
+                                            disabled={
+                                                isJoined(community.id) || showLock
+                                            }
+                                            onClick={ () => handleJoinCommunity(community.id) }
+                                            >
+                                                {showLock && <LockIcon className="size-4 text-muted-foreground" />}
+                                            {
+                                                isJoined(community.id) ? <><CheckIcon />Joined</> : "Join Community"
+                                            }
+                                        </Button>
                                     </CardDescription>
                                 </CardHeader>
                             </Card>
