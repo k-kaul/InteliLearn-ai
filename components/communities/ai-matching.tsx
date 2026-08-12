@@ -1,8 +1,9 @@
 import { useAiPartners } from "@/hooks/use-ai-partner";
 import { Button } from "../ui/button";
 import { toast } from "../ui/toast";
+import { LockIcon } from "lucide-react";
 
-export default function AIMatching({ totalGoals, selectedCommunityId }: { totalGoals:number; selectedCommunityId:string; }){
+export default function AIMatching({ totalGoals, selectedCommunityId, showLock }: { totalGoals:number; selectedCommunityId:string; showLock:boolean}){
     const aiPartnerMutation = useAiPartners();
 
     async function handleFindAiPartners(){
@@ -29,10 +30,14 @@ export default function AIMatching({ totalGoals, selectedCommunityId }: { totalG
                     Our AI will analyze your learning goals and automatically match you with the most compatible learning partners in this community.
                 </p>
             </div>
-            <Button size={"lg"} 
-                disabled={totalGoals === 0}
+            <Button 
+                size={"lg"} 
+                disabled={totalGoals === 0 || showLock}
                 onClick={handleFindAiPartners}
-                >Find Partners with AI</Button>
+            >
+                {showLock && <LockIcon className="text-muted-foreground"/>}
+                Find Partners with AI
+            </Button>
             {
                 totalGoals > 0 ? (
                     <p className="mt-4 text-sm text-muted-foreground">{`You have ${totalGoals} learning${totalGoals === 1 ? " goal" : " goals"} set`}</p>
