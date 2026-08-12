@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/api-client";
 import { useUser } from "@clerk/nextjs";
-import { use, useState } from "react";
+import { useState } from "react";
 
 export function ChatInterface({matchId}: {
     matchId:string;
