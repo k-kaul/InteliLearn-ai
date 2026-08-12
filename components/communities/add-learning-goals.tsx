@@ -1,10 +1,16 @@
-import { PlusIcon } from "lucide-react";
+import { LockIcon, PlusIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
 import { useCreateLearningGoal } from "@/hooks/use-goals";
 
-export default function AddLearningGoal({ selectedCommunityId }: { selectedCommunityId: string}){
+export default function AddLearningGoal({ 
+    selectedCommunityId,
+    showLock
+}: { 
+    selectedCommunityId: string,
+    showLock: boolean
+}){
     const [showNewGoalForm,setShowNewGoalForm] = useState(false);
     const [newGoalText, setNewGoalText] = useState("");
     const createGoalMutation = useCreateLearningGoal();
@@ -43,7 +49,9 @@ export default function AddLearningGoal({ selectedCommunityId }: { selectedCommu
                                 className={""} 
                                 size={"sm"} 
                                 onClick={handleCreateGoal}
-                                disabled={createGoalMutation.isPending || newGoalText.length === 0}
+                                disabled={
+                                    createGoalMutation.isPending || newGoalText.length === 0 || showLock
+                                }
                             >Add Goal</Button>
                             <Button className={""} size={"sm"} 
                                 variant={"outline"}
@@ -52,7 +60,13 @@ export default function AddLearningGoal({ selectedCommunityId }: { selectedCommu
                         </div>
                     </div>
                 ) : (
-                    <Button onClick={() => setShowNewGoalForm(true)} variant={"outline"} className={"w-full"}>
+                    <Button onClick={() => setShowNewGoalForm(true)} 
+                        variant={"outline"} 
+                        className={"w-full"}
+                        disabled={showLock}
+                    >
+                        { showLock && <LockIcon className="text-muted-foreground"/> }
+
                         <PlusIcon />Add New Learning Goal
                     </Button>
                 )
