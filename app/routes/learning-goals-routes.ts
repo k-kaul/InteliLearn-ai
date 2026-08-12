@@ -68,5 +68,11 @@ const learningGoalsApp = new Hono<{Variables: Variables}>()
 
             return c.json(goal)
     })
+    .get("/goals", async(c) => {
+        const user = c.get("user");
+        const goals = await db.select().from(learningGoals).where(eq(learningGoals.userId, user.id));
+
+        return c.json(goals);
+    })
 
 export {learningGoalsApp}
