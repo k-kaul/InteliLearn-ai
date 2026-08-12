@@ -63,7 +63,6 @@ export default function AddLearningGoal({
                     <Button onClick={() => setShowNewGoalForm(true)} 
                         variant={"outline"} 
                         className={"w-full"}
-                        disabled={showLock}
                     >
                         { showLock && <LockIcon className="text-muted-foreground"/> }
 
