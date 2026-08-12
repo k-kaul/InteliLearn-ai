@@ -155,12 +155,10 @@ export default function DashboardPage(){
                             {   
                                 userCommunities?.map((community,idx) => (
                                     <Card key={idx}>
-                                        <Link href={`/communities/${community.id}`}>
-                                            <CardHeader>
-                                                <CardTitle className="text-sm">{community.community.name}</CardTitle>
-                                                <CardDescription className="text-sm">{community.community.description}</CardDescription>
-                                            </CardHeader>
-                                        </Link>
+                                        <CardHeader>
+                                            <CardTitle className="text-sm">{community.community.name}</CardTitle>
+                                            <CardDescription className="text-sm">{community.community.description}</CardDescription>
+                                        </CardHeader>
                                     </Card>                                    
                                 ))
                             }
