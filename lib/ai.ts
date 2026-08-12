@@ -7,9 +7,12 @@ import {
   getMembersInCommunity,
   getPartnerUserId,
   getUserMatchesInCommunity,
+  getUsersByIds,
 } from "./db-helpers";
 import { getOrCreateUserByClerkId } from "./user-utils";
-import {learningGoals} from "@/db/schema";
+import {conversationSummaries, learningGoals, messages} from "@/db/schema";
+import { db } from "@/db";
+import { desc, eq } from "drizzle-orm";
 
 export const aiMatchUsers = async (
   user: NonNullable<Awaited<ReturnType<typeof getOrCreateUserByClerkId>>>,
@@ -80,50 +83,50 @@ export const aiMatchUsers = async (
     // Use AI to analyze and match
     const prompt = `You are an AI matching assistant for a learning platform. Your job is to match learners with compatible learning partners.
 
-Current User: ${user.name}
-Their Learning Goals:
-${currentUserGoals.map((g) => `- ${g.title}: ${g.description}`).join("\n")}
+    Current User: ${user.name}
+    Their Learning Goals:
+    ${currentUserGoals.map((g) => `- ${g.title}: ${g.description}`).join("\n")}
 
-Potential Partners:
-${potentialPartners
-  .map(
-    (p, idx) => `
-${idx + 1}. ${p.username}
-   Goals:
-   ${p.goals
-     .map(
-       (g: typeof learningGoals.$inferSelect) =>
-         `   - ${g.title}: ${g.description}`
-     )
-     .join("\n")}
-`
-  )
-  .join("\n")}
+    Potential Partners:
+    ${potentialPartners
+      .map(
+        (p, idx) => `
+    ${idx + 1}. ${p.username}
+      Goals:
+      ${p.goals
+        .map(
+          (g: typeof learningGoals.$inferSelect) =>
+            `   - ${g.title}: ${g.description}`
+        )
+        .join("\n")}
+    `
+      )
+      .join("\n")}
 
-Task: Analyze the learning goals and identify the TOP 3 most compatible learning partners for ${
-      user.name
-    }.
+    Task: Analyze the learning goals and identify the TOP 3 most compatible learning partners for ${
+          user.name
+        }.
 
-IMPORTANT MATCHING CRITERIA:
-1. Use SEMANTIC SIMILARITY - goals don't need exact title matches. For example:
-   - "Learn the basics of React" matches with "React Hooks deep dive" (both about React)
-   - "Next.js - App Router - Build and Ship an app" matches with "Next.js App Router" (both about Next.js App Router)
-   - "JavaScript fundamentals" matches with "JavaScript ES6+ features" (both about JavaScript)
+    IMPORTANT MATCHING CRITERIA:
+    1. Use SEMANTIC SIMILARITY - goals don't need exact title matches. For example:
+      - "Learn the basics of React" matches with "React Hooks deep dive" (both about React)
+      - "Next.js - App Router - Build and Ship an app" matches with "Next.js App Router" (both about Next.js App Router)
+      - "JavaScript fundamentals" matches with "JavaScript ES6+ features" (both about JavaScript)
 
-2. Look at BOTH title and description to understand what the person wants to learn
+    2. Look at BOTH title and description to understand what the person wants to learn
 
-3. Consider:
-   - Overlapping or complementary learning goals (even if worded differently)
-   - Similar skill levels or learning paths
-   - Potential for mutual learning and knowledge sharing
-   - Common interests and learning styles
+    3. Consider:
+      - Overlapping or complementary learning goals (even if worded differently)
+      - Similar skill levels or learning paths
+      - Potential for mutual learning and knowledge sharing
+      - Common interests and learning styles
 
-4. Be INCLUSIVE - if there's any reasonable connection between learning goals, include them as a potential match
+    4. Be INCLUSIVE - if there's any reasonable connection between learning goals, include them as a potential match
 
-Return ONLY a JSON array of partner indices (1-based) in order of compatibility. Return between 1-3 matches maximum.
-Example: [2, 5, 1] means partner #2 is the best match, then #5, then #1.
+    Return ONLY a JSON array of partner indices (1-based) in order of compatibility. Return between 1-3 matches maximum.
+    Example: [2, 5, 1] means partner #2 is the best match, then #5, then #1.
 
-Only return an empty array [] if there are truly NO partners with any related learning interests.`;
+    Only return an empty array [] if there are truly NO partners with any related learning interests.`;
 
     const { text } = await generateText({
       model: google("gemini-3-flash-preview"),
@@ -193,8 +196,78 @@ Only return an empty array [] if there are truly NO partners with any related le
   }
 };
 
-export const generateAISummaries = async (
+export const generateAISummaries = async (conversationId:string, conversationMessages: typeof messages.$inferSelect[]) => {
+  //get user info from conversations
+  const userIds = [...new Set(conversationMessages.map((m) => m.senderId))];
+  const usersMap = await getUsersByIds(userIds);
+  const formattedMessages = conversationMessages.map((m) => {
+    const user = usersMap.get(m.senderId);
+    return `${user?.name}: ${m.content}`
+  });
+  const conversationText = formattedMessages.join("\n");
   
-) => {
+  //prompt AI for summary
+  const prompt = `You are an AI assistant that summarizes learning conversations between matched learning partners.
+
+  Analyze the following conversation and provide:
+  1. A concise summary of what was discussed
+  2. Key points and insights shared
+  3. Action items mentioned in the conversation
+  4. Next steps for the learning partners
+
+  Conversation:
+  ${conversationText}
+
+  Please format your response as JSON with this structure:
+  {
+    "summary": "A 2-3 sentence overview",
+    "keyPoints": ["point 1", "point 2", ...],
+    "actionItems": ["action item 1", "action item 2", ...],
+    "nextSteps": ["step 1", "step 2", ...]
+  }`;
+  //invoke Ai
+  try {
+    const {text} = await generateText({
+      model: google("gemini-3-flash-preview"),
+      prompt
+    });
+    //format and parse json data
+    let jsonText = text.trim();
+    if (jsonText.startsWith("```json")) {
+      jsonText = jsonText.replace(/^```json\s*\n/, "").replace(/\n```\s*$/, "");
+    } else if (jsonText.startsWith("```")) {
+      jsonText = jsonText.replace(/^```\s*\n/, "").replace(/\n```\s*$/, "");
+    }
+
+    const parsed = JSON.parse(jsonText);
+
+    const [summary] = await db.insert(conversationSummaries)
+      .values({
+        conversationId,
+        summary: parsed.summary,
+        actionItems: parsed.actionItems,
+        keyPoints: parsed.keyPoints || [],
+        nextSteps: parsed.nextSteps || [],
+      })
+      .returning();
+
+    return summary;
+
+  } catch (error) {
+    console.error("Error generating AI summary", error);
+    throw new Error("Error generating AI summary");
+  }
   
+  //save summary in db
+
 };
+
+export const getLatestConversationSummary = async (conversationId:string) => {
+  const [summary] = await db.select()
+    .from(conversationSummaries)
+    .where(eq(conversationSummaries.conversationId, conversationId))
+    .orderBy(desc(conversationSummaries.generatedAt))
+    .limit(1);
+
+  return summary || [];
+}
