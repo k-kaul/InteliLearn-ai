@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
-import { communities } from "@/db/schema";
 import { useCurrentUser } from "@/hooks/use-users";
 import { useAllCommunities, useCommunities, useJoinCommunity } from "@/hooks/useCommunities";
 import { ArrowLeftIcon, CheckIcon, LockIcon } from "lucide-react";

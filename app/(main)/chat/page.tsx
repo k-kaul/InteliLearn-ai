@@ -5,135 +5,147 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAcceptMatch, useMatches } from "@/hooks/use-ai-partner"
 import { UserAvatar } from "@/components/ui/user-avatar"
 import { useRouter } from "next/navigation"
+import { useCurrentUser } from "@/hooks/use-users"
 
 export default function ChatPage(){
-    const router = useRouter();
-    
-    const {data:matches, isLoading:isLoadingMatches, error:errorMatches} = useMatches();
+  const {data:user} = useCurrentUser();
+  const isPro = user?.isPro;
 
-    const acceptMatchMutation = useAcceptMatch();
+  const router = useRouter();
+  
+  const {data:matches, isLoading:isLoadingMatches, error:errorMatches} = useMatches();
 
-    if(isLoadingMatches) return <div>Loading...</div>;
-    if(errorMatches) return <div>Error: {errorMatches.message}</div>;
+  const acceptMatchMutation = useAcceptMatch();
 
-    const pendingMatches = matches?.filter((match) => match.status === "pending");
-    const acceptedMatches = matches?.filter((match) => match.status === "accepted");
-    
-    if(acceptMatchMutation.isError) return <div>Error: {acceptMatchMutation.error.message}</div>
+  if(isLoadingMatches) return <div>Loading...</div>;
+  if(errorMatches) return <div>Error: {errorMatches.message}</div>;
 
-    return (
-        <div className="page-wrapper">
-            <h1 className="text-2xl font-semibold">Pending Matches</h1>
-            <div className="flex gap-4 overflow-x-scroll">
-                {
-                    pendingMatches?.map((match) => {
-                        const partner = {
-                            id: match.partner.id || "",
-                            name: match.partner.name || "Partner",
-                            imageUrl: match.partner.imageUrl ?? undefined,
-                        }
-                        return <Card
-              key={match.id}
-              className="flex flex-col max-h-125 max-w-87.5 min-w-87.5"
-            >
-              <CardHeader className="shrink-0">
-                <div className="flex items-center gap-3 mb-2">
-                  <UserAvatar name={partner.name} imageUrl={partner.imageUrl} />
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-lg truncate">
-                      {partner.name}
-                    </CardTitle>
-                    {match.community && (
-                      <p className="text-sm text-muted-foreground mt-1 truncate">
-                        {match.community.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col flex-1 space-y-2 min-h-0 overflow-hidden">
-                <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-                  {match.partnerGoals && match.partnerGoals.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground mb-2">
-                        Their Learning Goals:
-                      </p>
-                      <div className="space-y-2">
-                        {match.partnerGoals.map((g) => (
-                          <Badge
-                            key={g.id}
-                            className="text-xs"
-                            variant={"secondary"}
-                          >
-                            {g.title}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+  const pendingMatches = matches?.filter((match) => match.status === "pending");
+  const acceptedMatches = matches?.filter((match) => match.status === "accepted");
+  
+  let pendingMatchesToShow = [];
+  
+  if(!isPro){
+    pendingMatchesToShow = pendingMatches?.slice(0,1) || [];
+  } else {
+    pendingMatchesToShow = pendingMatches || [];
+  }
+
+  if(acceptMatchMutation.isError) return <div>Error: {acceptMatchMutation.error.message}</div>
+
+  return (
+      <div className="page-wrapper">
+          <h1 className="text-2xl font-semibold">Pending Matches</h1>
+          <div className="flex gap-4 overflow-x-scroll">
+              {
+                  pendingMatchesToShow?.map((match) => {
+                      const partner = {
+                          id: match.partner.id || "",
+                          name: match.partner.name || "Partner",
+                          imageUrl: match.partner.imageUrl ?? undefined,
+                      }
+                      return <Card
+            key={match.id}
+            className="flex flex-col max-h-125 max-w-87.5 min-w-87.5"
+          >
+            <CardHeader className="shrink-0">
+              <div className="flex items-center gap-3 mb-2">
+                <UserAvatar name={partner.name} imageUrl={partner.imageUrl} />
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-lg truncate">
+                    {partner.name}
+                  </CardTitle>
+                  {match.community && (
+                    <p className="text-sm text-muted-foreground mt-1 truncate">
+                      {match.community.name}
+                    </p>
                   )}
                 </div>
-                <Button
-                  className={"w-full shrink-0 mt-2"}
-                  onClick={() => acceptMatchMutation.mutate(match.id)}
-                  disabled={acceptMatchMutation.isPending}
-                >
-                  {acceptMatchMutation.isPending ? "Accepting..." : "Accept and Start Chatting"}
-                </Button>
-              </CardContent>
-            </Card>
-                    })
-                }
-            </div>            
-            <h2 className="text-xl font-semibold">Active Chats</h2>
-            <div className="flex flex-col gap-4">
-                {
-                    acceptedMatches?.map((match) => {
-                        const partner = {
-                            id: match.partner.id || "",
-                            name: match.partner.name || "Partner",
-                            imageUrl: match.partner.imageUrl ?? undefined
-                        }
-                        return (
-                            <Card key={match.id} 
-                            className="flex w-full cursor-pointer hover:bg-accent transition-colors duration-200" 
-                            onClick={() => router.push(`/chat/${match.id}`)}>
-                                <CardContent className="flex items-center gap-4 p-4">                                    
-                                    <UserAvatar name={partner.name} imageUrl={partner.imageUrl}
-                                    />
-                                    <div className="flex-1">
-                                        <CardTitle className="text-lg truncate">
-                                            {match.partner.name}
-                                        </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col flex-1 space-y-2 min-h-0 overflow-hidden">
+              <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+                {match.partnerGoals && match.partnerGoals.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                      Their Learning Goals:
+                    </p>
+                    <div className="space-y-2">
+                      {match.partnerGoals.map((g) => (
+                        <Badge
+                          key={g.id}
+                          className="text-xs"
+                          variant={"secondary"}
+                        >
+                          {g.title}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <Button
+                className={"w-full shrink-0 mt-2"}
+                onClick={() => acceptMatchMutation.mutate(match.id)}
+                disabled={acceptMatchMutation.isPending}
+              >
+                {acceptMatchMutation.isPending ? "Accepting..." : "Accept and Start Chatting"}
+              </Button>
+            </CardContent>
+          </Card>
+                  })
+              }
+          </div>            
+          <h2 className="text-xl font-semibold">Active Chats</h2>
+          <div className="flex flex-col gap-4">
+              {
+                  acceptedMatches?.map((match) => {
+                      const partner = {
+                          id: match.partner.id || "",
+                          name: match.partner.name || "Partner",
+                          imageUrl: match.partner.imageUrl ?? undefined
+                      }
+                      return (
+                          <Card key={match.id} 
+                          className="flex w-full cursor-pointer hover:bg-accent transition-colors duration-200" 
+                          onClick={() => router.push(`/chat/${match.id}`)}>
+                              <CardContent className="flex items-center gap-4 p-4">                                    
+                                  <UserAvatar name={partner.name} imageUrl={partner.imageUrl}
+                                  />
+                                  <div className="flex-1">
+                                      <CardTitle className="text-lg truncate">
+                                          {match.partner.name}
+                                      </CardTitle>
+                                      {
+                                          match.community && (
+                                              <p className="text-sm mt-1 truncate font-medium">
+                                                  {match.community.name}
+                                              </p>
+                                          )
+                                      }
+                                      <div className="flex flex-wrap gap-2 mt-1">
+                                        {match.userGoals && (
+                                          <span className="text-xs text-muted-foreground"
+                                          >Your Goals:{" "}
+                                            { match.userGoals.map((g) => g.title).join(", ") }
+                                          </span>
+                                        )}
                                         {
-                                            match.community && (
-                                                <p className="text-sm mt-1 truncate font-medium">
-                                                    {match.community.name}
-                                                </p>
-                                            )
-                                        }
-                                        <div className="flex flex-wrap gap-2 mt-1">
-                                          {match.userGoals && (
-                                            <span className="text-xs text-muted-foreground"
-                                            >Your Goals:{" "}
-                                              { match.userGoals.map((g) => g.title).join(", ") }
+                                          match.partnerGoals && match.partnerGoals.length > 0 && (
+                                            <span className="text-xs text-muted-foreground">
+                                                Their Goals:{" "}
+                                                { match.partnerGoals.map((g) => g.title).join(", ") }
                                             </span>
-                                          )}
-                                          {
-                                            match.partnerGoals && match.partnerGoals.length > 0 && (
-                                              <span className="text-xs text-muted-foreground">
-                                                  Their Goals:{" "}
-                                                  { match.partnerGoals.map((g) => g.title).join(", ") }
-                                              </span>
-                                            )
-                                          }
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )
-                    })
-                }
-            </div>
-        </div>
+                                          )
+                                        }
+                                      </div>
+                                  </div>
+                              </CardContent>
+                          </Card>
+                      )
+                  })
+              }
+          </div>
+      </div>
     )
 }
