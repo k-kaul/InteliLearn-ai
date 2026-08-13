@@ -1,4 +1,3 @@
-import BackgroundGradient from "@/components/landing/bg-gradient";
 import CtaSection from "@/components/landing/cta-section";
 import FeatuersSection from "@/components/landing/features-section";
 import HeroSection from "@/components/landing/hero-section";
@@ -9,7 +8,6 @@ import { MotionDiv } from "@/components/ui/motion-div";
 export default function Home() {
   return (
     <div className="relative min-h-screen">
-      {/* <BackgroundGradient /> */}
       <div className="relative z-10">
         <MotionDiv initial={{opacity:0, y:20}} transition={{duration: 0.6}}>
           <HeroSection />

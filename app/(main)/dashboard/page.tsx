@@ -59,7 +59,7 @@ export default function DashboardPage(){
             </div>
 
             {/* Pending matches */}            
-            <Card className="border-primary">
+            <Card className="border-primary shadow-sm">
                 <CardHeader>
                     <CardTitle>
                         🤝 You have {pendingMatches?.length} new {" "} 
@@ -69,7 +69,7 @@ export default function DashboardPage(){
                 </CardHeader>
                 <CardContent>
                     <Link href={"/chat"}>
-                        <Button>Review Matches</Button>
+                        <Button className={"shadow-sm"}>Review Matches</Button>
                     </Link>
                 </CardContent>
             </Card>
@@ -96,14 +96,14 @@ export default function DashboardPage(){
             
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* Recent chats */}
-                <Card>
+                <Card className="shadow-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="flex items-center">
                                 <UsersIcon className="size-4 mr-2 text-primary"/>Recent Chats
                             </CardTitle>
                             <Link href="/communities">
-                                <Button variant={"outline"} size={"sm"}>View All</Button>
+                                <Button variant={"outline"} size={"sm"} className="shadow-sm">View All</Button>
                             </Link>
                         </div>
                         {/* recent chats */}
@@ -112,7 +112,7 @@ export default function DashboardPage(){
                             {
                                 currentMatches?.map((match) => (
                                     <Link key={match.id} href={`/chat/${match.id}`}>
-                                        <Card >
+                                        <Card className="shadow-xs">
                                             <CardHeader>
                                                 <div className="flex items-center gap-4">
                                                     <UserAvatar name={match.partner.name} imageUrl={match.partner.imageUrl || ""}/>
@@ -138,14 +138,14 @@ export default function DashboardPage(){
                 </Card>
 
                 {/* Communities */}
-                <Card>
+                <Card className="shadow-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle className="flex items-center">
                                 <UsersIcon className="size-4 mr-2 text-primary"/>Communities
                             </CardTitle>
                             <Link href="/communities">
-                                <Button variant={"outline"} size={"sm"}>Manage</Button>
+                                <Button variant={"outline"} size={"sm"} className={"shadow-sm"}>Manage</Button>
                             </Link>
                         </div>
                         <CardDescription>Communities you are a part of:</CardDescription>
@@ -154,7 +154,7 @@ export default function DashboardPage(){
                         <div className="space-y-3">
                             {   
                                 userCommunities?.map((community,idx) => (
-                                    <Card key={idx}>
+                                    <Card key={idx} className="shadow-xs">
                                         <CardHeader>
                                             <CardTitle className="text-sm">{community.community.name}</CardTitle>
                                             <CardDescription className="text-sm">{community.community.description}</CardDescription>

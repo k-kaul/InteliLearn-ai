@@ -11,8 +11,8 @@ export default async function Header(){
         plan: "pro"
     });
     return (
-        <header>
-            <div className="flex justify-between layout-container">
+        <header className="bg-[#050816] text-white border-b-0">
+            <div className="flex justify-between layout-container ">
                 <div className="flex items-center gap-6">
                     <Link href={"/"} className="font-bold text-xl">InteliLearn</Link>
                     <Show when={"signed-in"}>
@@ -43,10 +43,10 @@ export default async function Header(){
                 </div>
                 
                 <Show when="signed-in">
-                    <div className="flex items-center gap-4">                    
+                    <div className="flex items-center gap-4 text-white">                    
                         {
-                            isPro ? <Badge variant={"outline"} className="flex items-center gap-2">
-                                        <TrophyIcon className="size-3"/>
+                            isPro ? <Badge variant={"outline"} className="flex items-center gap-2 text-white">
+                                        <TrophyIcon className="size-3 text-white"/>
                                         Pro
                                     </Badge> : "Free"
                         }

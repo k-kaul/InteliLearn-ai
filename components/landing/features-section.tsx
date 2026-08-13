@@ -126,23 +126,26 @@ const features = [
 
 export default function FeatuersSection(){
     return (
-        <section className="section-container">
-            <div className="section-padding">
-                <SectionHeading title="Everything You Need to Learn Together" description="Powerful featuers designed to help ypu find, connect, and learn with the right partners."/>
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {
-                    features.map((feature,idx) => (
-                        <Card key={idx} className="border-2 hover:border-primary/50 transition-colors">
-                            <CardHeader>
-                                <div className="feature-icon mb-4">{feature.icon}</div>
-                                <CardTitle>{feature.title}</CardTitle>
-                                <CardDescription>{feature.description}</CardDescription>
-                            </CardHeader>
-                        </Card>
-                    ))
-                }
-            </div>
-        </section>
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="py-24 sm:py-32 space-y-10">
+            <SectionHeading 
+              title="Everything You Need to Learn Together" 
+              description="Powerful featuers designed to help you find, connect, and learn with the right partners."
+            />
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {
+                features.map((feature,idx) => (
+                    <Card key={idx} className="border-slate-50 hover:border-primary/50 transition-colors shadow-lg">
+                        <CardHeader>
+                            <div className="feature-icon mb-4 border">{feature.icon}</div>
+                            <CardTitle>{feature.title}</CardTitle>
+                            <CardDescription>{feature.description}</CardDescription>
+                        </CardHeader>
+                    </Card>
+                ))
+            }
+          </div>
+        </div>
+      </section>
     )
 }

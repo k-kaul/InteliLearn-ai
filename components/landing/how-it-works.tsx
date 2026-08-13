@@ -26,13 +26,16 @@ const steps = [
 
 export default function HowItWorksSection(){
     return (
-        <section className="section-padding">
-            <div className="section-container">
-                <SectionHeading title="How it Works" description="Get mathced with your ideal learning partner in 4 simple steps"/>
+        <section className="section-padding bg-zinc-100">
+            <div className="section-container space-y-10">
+                <SectionHeading 
+                    title="How it Works" 
+                    description="Get matched with your ideal learning partner in 4 simple steps"
+                />
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
                     {
                         steps.map((step,idx) => (
-                            <Card key={idx} className="hover:scale-105 transition-all duration-300">
+                            <Card key={idx} className="hover:scale-105 transition-all duration-300 shadow-lg">
                                 <CardHeader>
                                     <div className="flex justify-center mb-4">
                                         <div className="step-number">{idx+1}</div>
